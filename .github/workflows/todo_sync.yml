@@ -1,0 +1,41 @@
+name: Temporary TODO sync
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Apply README update and remove temporary files
+        required: true
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+        default: 'false'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out dev branch
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - name: Analyze and update the Complete TODO List
+        env:
+          APPLY: ${{ inputs.apply }}
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/sync_todo.py
+
+          if [ "$APPLY" = "true" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git rm -f .github/scripts/sync_todo.py .github/workflows/todo_sync.yml
+            git add README.md
+            git commit -m "docs: update complete TODO list for dev changes"
+            git push origin HEAD:dev
+          fi
