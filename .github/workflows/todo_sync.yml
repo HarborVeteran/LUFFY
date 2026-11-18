@@ -1,5 +1,7 @@
 name: Temporary TODO sync
 on:
+  push:
+    branches: [dev]
   workflow_dispatch:
     inputs:
       apply:
@@ -26,7 +28,7 @@ jobs:
 
       - name: Analyze and update the Complete TODO List
         env:
-          APPLY: ${{ inputs.apply }}
+          APPLY: 'false'
         run: |
           set -euo pipefail
           python3 .github/scripts/sync_todo.py
